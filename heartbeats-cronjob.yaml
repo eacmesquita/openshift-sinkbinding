@@ -1,0 +1,33 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: heartbeat-cron
+  namespace: serverless-example
+spec:
+spec:
+  # Run every minute
+  schedule: "* * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        app: heartbeat-cron
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: single-heartbeat
+              image: quay.io/openshift-knative/knative-eventing-sources-heartbeats:v0.13.2
+              args:
+                - --period=1
+              env:
+                - name: ONE_SHOT
+                  value: "false"
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
